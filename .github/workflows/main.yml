@@ -49,7 +49,7 @@ jobs:
 
       - name: Update version in .csproj
         run: |
-          sed -i 's/<Version>*<\/Version>/<Version>${{ steps.set_version.outputs.new_version }}<\/Version>/' ./nomsol.core.api.csproj
+          sed -i 's/<Version>*<\/Version>/<Version>${{ steps.set_version.outputs.new_version }}<\/Version>/' ./nomsol.core.api/nomsol.core.api.csproj
 
       - name: Restore dependencies
         run: dotnet restore
