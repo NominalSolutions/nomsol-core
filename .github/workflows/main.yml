@@ -45,20 +45,20 @@ jobs:
           # Construct the new version with pre-release label
           NEW_VERSION="$MAJOR.$MINOR.$PATCH-alpha.${{ github.run_number }}"
           echo "New version: $NEW_VERSION"
-          echo "##[set-output name=new_version;]$NEW_VERSION"
+          echo "##[set-output name=new_version;]$VERSION"
 
       - name: Update version in .csproj
         run: |
           sed -i 's/<Version>*<\/Version>/<Version>${{ steps.set_version.outputs.new_version }}<\/Version>/' ./nomsol.core.api/nomsol.core.api.csproj
 
       - name: Restore dependencies
-        run: dotnet restore
-
+        run: dotnet restore ./nomsol.core.api/nomsol.core.api.csproj
+  
       - name: Build the project
-        run: dotnet build --configuration Release --no-restore
-
+        run: dotnet build ./nomsol.core.api/nomsol.core.api.csproj --configuration Release --no-restore
+  
       - name: Pack NuGet package
-        run: dotnet pack --configuration Release --no-build --output ./nupkgs
+        run: dotnet pack ./nomsol.core.api/nomsol.core.api.csproj --configuration Release --no-build --output ./nupkgs
 
       - name: Publish to NuGet
         env:
