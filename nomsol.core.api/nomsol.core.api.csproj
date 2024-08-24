@@ -1,15 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Title>Nominal Solutions Core API Library</Title>
+		<Authors>Nominal Solutions Development Team</Authors>
+		<Copyright>2024 Nominal Solutions</Copyright>
+		<PackageProjectUrl>http://www.nominal.solutions</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/NominalSolutions/nomsol-core</RepositoryUrl>
+		<Version>0.0.1-beta</Version>
+		<Description>The Nominal Solutions Core API Extensions library provides a set of essential tools and configurations to streamline the development of ASP.NET Core APIs. This package includes a customizable Basic Authentication handler, comprehensive Swagger configuration, and API versioning support. With built-in support for Serilog logging and seamless integration into existing projects, this library is designed to help you build robust and secure APIs with minimal setup.</Description>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
-    <PackageReference Include="Serilog" Version="4.0.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.2" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
+		<PackageReference Include="Serilog" Version="4.0.1" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.2" />
+	</ItemGroup>
 
 </Project>
