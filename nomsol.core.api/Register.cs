@@ -77,6 +77,28 @@ namespace nomsol.core.api
             });
 
             return app;
-        }                
+        }
+
+        public static IServiceCollection AddBusinessServices(this IServiceCollection services, Assembly? assembly = null)
+        {
+            assembly ??= Assembly.GetCallingAssembly();
+
+            Log.Information("Injecting Business Services from Assembly: " + assembly.FullName);
+
+            foreach (Type item in (from t in assembly.GetTypes()
+                                   where t.IsClass && !t.IsAbstract && t.GetCustomAttribute<AddToScopeAttribute>() != null
+                                   select t).ToList())
+            {
+                Type[] interfaces = item.GetInterfaces();
+                foreach (Type type in interfaces)
+                {
+                    services.AddScoped(type, item);
+                    Log.Information("Registered " + type.Name + " with " + item.Name);
+                }
+            }
+
+            return services;
+        }
+
     }
 }
