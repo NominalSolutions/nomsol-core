@@ -9,7 +9,7 @@
 		<Copyright>2024 Nominal Solutions</Copyright>
 		<PackageProjectUrl>http://www.nominal.solutions</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/NominalSolutions/nomsol-core</RepositoryUrl>
-		<Version>1.0.0</Version>
+		<Version>1.0.1</Version>
 		<Description>The Nominal Solutions Core API Extensions library provides a set of essential tools and configurations to streamline the development of ASP.NET Core APIs. This package includes a customizable Basic Authentication handler, comprehensive Swagger configuration, and API versioning support. With built-in support for Serilog logging and seamless integration into existing projects, this library is designed to help you build robust and secure APIs with minimal setup.</Description>
 	</PropertyGroup>
 

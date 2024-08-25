@@ -77,33 +77,6 @@ namespace nomsol.core.api
             });
 
             return app;
-        }
-
-        public static IServiceCollection AddBusinessServices(this IServiceCollection services)
-        {
-            Log.Information("Injecting Business Services");
-
-            // Find all types with the AddToScope attribute
-            var assembly = Assembly.GetExecutingAssembly();
-            var typesWithAttribute = assembly.GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract && t.GetCustomAttribute<AddToScopeAttribute>() != null)
-            .ToList();
-
-            foreach (var type in typesWithAttribute)
-            {
-                // Get all the interfaces implemented by this class
-                var interfaces = type.GetInterfaces();
-
-                foreach (var @interface in interfaces)
-                {
-                    // Register the class as the implementation of its interface
-                    services.AddScoped(@interface, type);
-                    string logMessage = "Registered " + @interface.Name + " with " + type.Name;
-                    Log.Information(logMessage);
-                }
-            }
-
-            return services;
-        }
+        }                
     }
 }
