@@ -1,4 +1,4 @@
-name: Create and Publish NuGet Package
+name: Create and Publish NuGet Packages
 
 on:
   push:
@@ -9,12 +9,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        project:
+          - nomsol.core.api
+          - nomsol.core
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # This ensures that all tags are fetched
+          fetch-depth: 0  # Fetch all tags for versioning
 
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
@@ -26,41 +30,61 @@ jobs:
         run: |
           TAG=$(git describe --tags --abbrev=0 || echo 'v0.0.0')
           echo "Latest tag: $TAG"
-          echo "##[set-output name=tag;]$TAG"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
 
       - name: Calculate next version
         id: set_version
         run: |
-          # Remove the 'v' prefix and split the version into components
           VERSION=${{ steps.get_tag.outputs.tag }}
-          VERSION=${VERSION#v}
+          VERSION=${VERSION#v}  # Remove 'v' prefix
           IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
-          MAJOR=${VERSION_PARTS[0]}
-          MINOR=${VERSION_PARTS[1]}
-          PATCH=${VERSION_PARTS[2]}
+          MAJOR=${VERSION_PARTS[0]:-0}  # Default to 0 if not set
+          MINOR=${VERSION_PARTS[1]:-0}
+          PATCH=${VERSION_PARTS[2]:-0}
           
-          # Increment the patch version
+          # Increment patch version
           PATCH=$((PATCH + 1))
           
-          # Construct the new version with pre-release label
+          # Construct new version with pre-release label
           NEW_VERSION="$MAJOR.$MINOR.$PATCH-alpha.${{ github.run_number }}"
           echo "New version: $NEW_VERSION"
-          echo "##[set-output name=new_version;]$VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Update version in .csproj
         run: |
-          sed -i 's/<Version>*<\/Version>/<Version>${{ steps.set_version.outputs.new_version }}<\/Version>/' ./nomsol.core.api/nomsol.core.api.csproj
+          CSPROJ_PATH="./${{ matrix.project }}/${{ matrix.project }}.csproj"
+          if [ -f "$CSPROJ_PATH" ]; then
+            sed -i "s|<Version>.*</Version>|<Version>${{ steps.set_version.outputs.new_version }}</Version>|" "$CSPROJ_PATH"
+            echo "Updated version in $CSPROJ_PATH to ${{ steps.set_version.outputs.new_version }}"
+          else
+            echo "Error: $CSPROJ_PATH not found"
+            exit 1
+          fi
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
       - name: Restore dependencies
-        run: dotnet restore ./nomsol.core.api/nomsol.core.api.csproj
-  
+        run: dotnet restore ./${{ matrix.project }}/${{ matrix.project }}.csproj
+
       - name: Build the project
-        run: dotnet build ./nomsol.core.api/nomsol.core.api.csproj --configuration Release --no-restore
-  
+        run: dotnet build ./${{ matrix.project }}/${{ matrix.project }}.csproj --configuration Release --no-restore
+
       - name: Pack NuGet package
-        run: dotnet pack ./nomsol.core.api/nomsol.core.api.csproj --configuration Release --no-build --output ./nupkgs
+        run: |
+          mkdir -p ./nupkgs/${{ matrix.project }}
+          dotnet pack ./${{ matrix.project }}/${{ matrix.project }}.csproj --configuration Release --no-build --output ./nupkgs/${{ matrix.project }}
 
       - name: Publish to NuGet
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: dotnet nuget push ./nupkgs/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+        run: |
+          dotnet nuget push ./nupkgs/${{ matrix.project }}/*.nupkg \
+            --api-key $NUGET_API_KEY \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
